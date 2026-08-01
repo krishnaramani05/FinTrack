@@ -1,0 +1,99 @@
+/* UI Cards Details */
+.stat-card {
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(124, 34, 229, 0.05) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.stat-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.income-theme {
+    color: var(--color-income);
+}
+.income-theme .stat-icon-wrapper {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.expense-theme {
+    color: var(--color-expense);
+}
+.expense-theme .stat-icon-wrapper {
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+.balance-theme {
+    color: var(--accent-primary);
+}
+.balance-theme .stat-icon-wrapper {
+    background: rgba(124, 34, 229, 0.1);
+    border: 1px solid rgba(124, 34, 229, 0.25);
+}
+
+.card-amount {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+/* Budgets and Progress bars */
+.budget-progress-container {
+    margin-bottom: 1.5rem;
+}
+.budget-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.progress-bar-custom {
+    height: 10px;
+    background-color: rgba(124, 34, 229, 0.08);
+    border-radius: 5px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: var(--transition-smooth);
+}
+
+.fill-income { background: var(--color-income); }
+.fill-expense { background: var(--color-expense); }
+.fill-warning { background: var(--color-warning); }
+.fill-primary { background: var(--accent-primary); }
+
+/* AI Statement Styling & Alignment */
+.ai-summary-box {
+    border-left: 4px solid var(--accent-secondary);
+    padding-left: 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.ai-bullet-point {
+    background: rgba(124, 34, 229, 0.04);
+    border: 1px solid rgba(124, 34, 229, 0.08);
+    padding: 1rem;
+    border-radius: 12px;
+}

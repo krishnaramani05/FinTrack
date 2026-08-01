@@ -1,0 +1,89 @@
+/* Register Page Custom Styles */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 480px;
+}
+
+.auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 2rem;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 1rem;
+    font-size: 1.1rem;
+    transition: var(--transition-smooth);
+    border-bottom: 2px solid transparent;
+}
+
+.auth-tab-btn.active {
+    color: var(--text-main);
+    border-bottom-color: var(--accent-primary);
+}
+
+/* Card layout & structure */
+.auth-card-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.auth-form-card {
+    width: 100%;
+    transition: var(--transition-smooth);
+    opacity: 1;
+}
+
+/* Floating background items for premium feel */
+.glowing-orbs {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: floatOrb 10s infinite alternate ease-in-out;
+}
+
+.orb-1 {
+    width: 300px;
+    height: 300px;
+    background: var(--accent-primary);
+    top: -50px;
+    left: -50px;
+}
+
+.orb-2 {
+    width: 250px;
+    height: 250px;
+    background: var(--accent-secondary);
+    bottom: -50px;
+    right: -50px;
+    animation-delay: 2s;
+}
+
+@keyframes floatOrb {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(30px) scale(1.1); }
+}
