@@ -1,16 +1,18 @@
+import {NavLink} from 'react-router-dom';
 import '../assets/css/base.css'
 import '../assets/css/transactions.css'
 import profile from '../assets/images/avatar-1.jpg'
+import TransactionRecords from '../components/TransactionRecords.jsx'
 
 function Transactions () {
 
     return (
         <>
             {/* Hidden CSS Toggle Checkboxes */}
-            <input type="checkbox" id="sidebarToggleCheck" className="d-none"/>
+            {/* <input type="checkbox" id="sidebarToggleCheck" className="d-none"/> */}
 
             {/* Mobile Header (Visible on small screens) */}
-            <div className="mobile-header">
+            {/* <div className="mobile-header">
                 <div className="d-flex align-items-center gap-2">
                     <div className="logo-icon" style={{ width: "32px", height: "32px", borderRadius: "8px" }}>
                         <i className="fa-solid fa-wallet text-white fs-6"></i>
@@ -20,7 +22,7 @@ function Transactions () {
                 <label htmlFor="sidebarToggleCheck" className="btn btn-outline-custom p-2 cursor-pointer" id="sidebarToggle">
                     <i className="fa-solid fa-bars"></i>
                 </label>
-            </div>
+            </div> */}
 
             <div className="app-container">
                 {/* SIDEBAR */}
@@ -35,34 +37,34 @@ function Transactions () {
                     <nav className="w-100 mb-4">
                         <ul className="nav-menu p-0 m-0">
                             <li>
-                                <a href="dashboard.html" className="nav-item-link">
+                                <NavLink to="/dashboard" className="nav-item-link">
                                     <i className="fa-solid fa-chart-pie"></i>
                                     <span>Dashboard</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="transactions.html" className="nav-item-link active">
+                                <NavLink to="/transactions" className="nav-item-link">
                                     <i className="fa-solid fa-list-check"></i>
                                     <span>Transactions</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="budget.html" className="nav-item-link">
+                                <NavLink to="/budget" className="nav-item-link">
                                     <i className="fa-solid fa-wallet"></i>
                                     <span>Budgets & Goals</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="reports.html" className="nav-item-link">
+                                <NavLink to="/reports" className="nav-item-link">
                                     <i className="fa-solid fa-circle-nodes"></i>
                                     <span>Reports & AI</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="settings.html" className="nav-item-link">
+                                <NavLink to="/settings" className="nav-item-link">
                                     <i className="fa-solid fa-gear"></i>
                                     <span>Settings</span>
-                                </a>
+                                </NavLink>
                             </li>
                         </ul>
                     </nav>
@@ -75,10 +77,10 @@ function Transactions () {
                                 <small className="text-muted text-truncate d-block" id="sidebarPlan">Premium Plan</small>
                             </div>
                         </div>
-                        <a href="login.html" className="nav-item-link p-2 text-danger bg-transparent" style={{ border: "none" }}>
+                        <NavLink to="/login" className="nav-item-link p-2 text-danger bg-transparent" style={{ border: "none" }}>
                             <i className="fa-solid fa-right-from-bracket"></i>
                             <span>Logout</span>
-                        </a>
+                        </NavLink>
                     </div>
                 </aside>
 
@@ -150,98 +152,7 @@ function Transactions () {
                                         <th className="text-end">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Jul 15, 2026</td>
-                                        <td>
-                                            <span className="fw-bold d-block text-white">Whole Foods Market</span>
-                                            <small className="text-muted">Debit Card Purchase</small>
-                                        </td>
-                                        <td><span className="text-muted">Food & Dining</span></td>
-                                        <td><span className="badge-expense text-uppercase">Expense</span></td>
-                                        <td className="text-danger fw-bold">-$84.20</td>
-                                        <td className="text-end">
-                                            <button className="btn btn-sm btn-outline-custom me-1" data-bs-toggle="modal" data-bs-target="#editTransactionModal" title="Edit Transaction">
-                                                <i className="fa-regular fa-pen-to-square"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal" title="Delete Transaction">
-                                                <i className="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Jul 14, 2026</td>
-                                        <td>
-                                            <span className="fw-bold d-block text-white">Monthly Freelance Salary</span>
-                                            <small className="text-muted">Direct Deposit</small>
-                                        </td>
-                                        <td><span className="text-muted">Salary & Freelancing</span></td>
-                                        <td><span className="badge-income text-uppercase">Income</span></td>
-                                        <td className="text-success fw-bold">+$1,500.00</td>
-                                        <td className="text-end">
-                                            <button className="btn btn-sm btn-outline-custom me-1" data-bs-toggle="modal" data-bs-target="#editTransactionModal">
-                                                <i className="fa-regular fa-pen-to-square"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
-                                                <i className="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Jul 12, 2026</td>
-                                        <td>
-                                            <span className="fw-bold d-block text-white">Netflix Subscription</span>
-                                            <small className="text-muted">Recurring Payment</small>
-                                        </td>
-                                        <td><span className="text-muted">Utilities & TV</span></td>
-                                        <td><span className="badge-expense text-uppercase">Expense</span></td>
-                                        <td className="text-danger fw-bold">-$15.49</td>
-                                        <td className="text-end">
-                                            <button className="btn btn-sm btn-outline-custom me-1" data-bs-toggle="modal" data-bs-target="#editTransactionModal">
-                                                <i className="fa-regular fa-pen-to-square"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
-                                                <i className="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Jul 10, 2026</td>
-                                        <td>
-                                            <span className="fw-bold d-block text-white">Uber Ride</span>
-                                            <small className="text-muted">Transport Fare</small>
-                                        </td>
-                                        <td><span className="text-muted">Transport</span></td>
-                                        <td><span className="badge-expense text-uppercase">Expense</span></td>
-                                        <td className="text-danger fw-bold">-$24.50</td>
-                                        <td className="text-end">
-                                            <button className="btn btn-sm btn-outline-custom me-1" data-bs-toggle="modal" data-bs-target="#editTransactionModal">
-                                                <i className="fa-regular fa-pen-to-square"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
-                                                <i className="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Jul 08, 2026</td>
-                                        <td>
-                                            <span className="fw-bold d-block text-white">Target Stores</span>
-                                            <small className="text-muted">Home Goods & Clothes</small>
-                                        </td>
-                                        <td><span className="text-muted">Shopping</span></td>
-                                        <td><span className="badge-expense text-uppercase">Expense</span></td>
-                                        <td className="text-danger fw-bold">-$112.90</td>
-                                        <td className="text-end">
-                                            <button className="btn btn-sm btn-outline-custom me-1" data-bs-toggle="modal" data-bs-target="#editTransactionModal">
-                                                <i className="fa-regular fa-pen-to-square"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
-                                                <i className="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                <TransactionRecords />
                             </table>
                         </div>
 

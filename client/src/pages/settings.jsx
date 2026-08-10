@@ -1,3 +1,4 @@
+import {NavLink} from 'react-router-dom';
 import "../assets/css/base.css";
 import "../assets/css/settings.css";
 import avatar1 from "../assets/images/avatar-1.jpg";
@@ -47,34 +48,34 @@ function Settings () {
                     <nav className="w-100 mb-4">
                         <ul className="nav-menu p-0 m-0">
                             <li>
-                                <a href="dashboard.html" className="nav-item-link">
+                                <NavLink to="/dashboard" className="nav-item-link">
                                     <i className="fa-solid fa-chart-pie"></i>
                                     <span>Dashboard</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="transactions.html" className="nav-item-link">
+                                <NavLink to="/transactions" className="nav-item-link">
                                     <i className="fa-solid fa-list-check"></i>
                                     <span>Transactions</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="budget.html" className="nav-item-link">
+                                <NavLink to="/budget" className="nav-item-link">
                                     <i className="fa-solid fa-wallet"></i>
                                     <span>Budgets & Goals</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="reports.html" className="nav-item-link">
+                                <NavLink to="/reports" className="nav-item-link">
                                     <i className="fa-solid fa-circle-nodes"></i>
                                     <span>Reports & AI</span>
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="settings.html" className="nav-item-link active">
+                                <NavLink to="/settings" className="nav-item-link">
                                     <i className="fa-solid fa-gear"></i>
                                     <span>Settings</span>
-                                </a>
+                                </NavLink>
                             </li>
                         </ul>
                     </nav>
@@ -87,10 +88,10 @@ function Settings () {
                                 <small className="text-muted text-truncate d-block" id="sidebarPlan">Premium Plan</small>
                             </div>
                         </div>
-                        <a href="login.html" className="nav-item-link p-2 text-danger bg-transparent" style={{border: 'none'}}>
+                        <NavLink to="/login" className="nav-item-link p-2 text-danger bg-transparent" style={{border: 'none'}}>
                             <i className="fa-solid fa-right-from-bracket"></i>
                             <span>Logout</span>
-                        </a>
+                        </NavLink>
                     </div>
                 </aside>
 

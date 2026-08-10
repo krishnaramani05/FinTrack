@@ -83,6 +83,20 @@
     animation-delay: 2s;
 }
 
+
+/* Password Toggle Hover Effect */
+.toggle-password-btn {
+    transition: var(--transition-smooth);
+}
+.toggle-password-btn:hover i {
+    color: var(--accent-primary);
+}
+/* Unified Focus Styling for Input Groups */
+.input-group:focus-within .input-group-text {
+    border-color: var(--accent-primary) !important;
+}
+
+
 @keyframes floatOrb {
     0% { transform: translateY(0) scale(1); }
     100% { transform: translateY(30px) scale(1.1); }

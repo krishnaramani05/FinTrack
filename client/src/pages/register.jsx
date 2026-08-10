@@ -1,3 +1,4 @@
+import {NavLink} from 'react-router-dom';
 import '../assets/css/base.css'
 import '../assets/css/register.css'
 
@@ -6,10 +7,10 @@ function Register () {
     return (
         <>
             {/* Floating Orbs Background */}
-            <div className="glowing-orbs">
+            {/* <div className="glowing-orbs">
                 <div className="orb orb-1"></div>
                 <div className="orb orb-2"></div>
-            </div>
+            </div> */}
 
             <div className="auth-wrapper">
                 <div className="auth-container" id="authContainer">
@@ -27,8 +28,8 @@ function Register () {
                         {/* REGISTER CARD */}
                         <div className="glass-card p-4 auth-form-card register-card animate-fade-in">
                             <div className="auth-tabs">
-                                <a href="login.html" className="auth-tab-btn text-center text-decoration-none" id="tabLogin">Sign In</a>
-                                <a href="register.html" className="auth-tab-btn active text-center text-decoration-none" id="tabRegister">Sign Up</a>
+                                <NavLink to="/login" className="auth-tab-btn text-center text-decoration-none" id="tabLogin">Sign In</NavLink>
+                                <NavLink to="/register" className="auth-tab-btn text-center text-decoration-none" id="tabRegister">Sign Up</NavLink>
                             </div>
 
                             <form action="login.html">
@@ -53,12 +54,38 @@ function Register () {
                                 </div>
 
                                 <div className="mb-3">
+                                    <label for="regMobile" className="form-label">Mobile Number</label>
+                                    <div className="input-group">
+                                        <span className="input-group-text border-end-0">
+                                            <i className="fa-regular fa-phone"></i>
+                                        </span>
+                                        <input type="tel" className="form-control border-start-0" id="regMobile" placeholder="123-456-7890" required/>
+                                    </div>
+                                </div>
+
+                                <div className="mb-3">
                                     <label for="regPassword" className="form-label">Create Password</label>
                                     <div className="input-group">
                                         <span className="input-group-text border-end-0">
                                             <i className="fa-solid fa-lock"></i>
                                         </span>
-                                        <input type="password" className="form-control border-start-0" id="regPassword" placeholder="Minimum 8 characters" required/>
+                                        <input type="password" className="form-control border-start-0 border-end-0" id="regPassword" placeholder="Minimum 8 characters" required/>
+                                        <span className="input-group-text border-start-0 text-muted toggle-password-btn" id="toggleRegPassword" style={{cursor: 'pointer'}}>
+                                            <i className="fa-regular fa-eye-slash" id="toggleRegPasswordIcon"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label for="regConfirmPassword" className="form-label">Confirm Password</label>
+                                    <div className="input-group">
+                                        <span className="input-group-text border-end-0">
+                                            <i className="fa-solid fa-lock"></i>
+                                        </span>
+                                        <input type="password" className="form-control border-start-0 border-end-0" id="regConfirmPassword" placeholder="Confirm your password" required/>
+                                        <span className="input-group-text border-start-0 text-muted toggle-password-btn" id="toggleConfirmPassword" style={{cursor: 'pointer'}}>
+                                            <i className="fa-regular fa-eye-slash" id="toggleConfirmPasswordIcon"></i>
+                                        </span>
                                     </div>
                                 </div>
 
@@ -77,7 +104,7 @@ function Register () {
                                 
                                 <div className="text-center">
                                     <span className="text-muted small">Already have an account? </span>
-                                    <a href="login.html" className="small font-weight-bold">Login Here</a>
+                                    <NavLink to="/login" className="small font-weight-bold">Login Here</NavLink>
                                 </div>
                             </form>
                         </div>

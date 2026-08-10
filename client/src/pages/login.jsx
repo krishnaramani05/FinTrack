@@ -1,3 +1,4 @@
+import {NavLink} from 'react-router-dom';
 import '../assets/css/login.css'
 import '../assets/css/base.css'
 
@@ -30,8 +31,8 @@ function Login () {
                             {/* LOGIN CARD */}
                             <div className="glass-card p-4 auth-form-card login-card animate-fade-in">
                                 <div className="auth-tabs">
-                                    <a href="login.html" className="auth-tab-btn active text-center text-decoration-none" id="tabLogin">Sign In</a>
-                                    <a href="register.html" className="auth-tab-btn text-center text-decoration-none" id="tabRegister">Sign Up</a>
+                                    <NavLink to="/login" className="auth-tab-btn text-center text-decoration-none" id="tabLogin">Sign In</NavLink>
+                                    <NavLink to="/register" className="auth-tab-btn text-center text-decoration-none" id="tabRegister">Sign Up</NavLink>
                                 </div>
 
                                 <form>
@@ -54,7 +55,10 @@ function Login () {
                                             <span className="input-group-text border-end-0">
                                                 <i className="fa-solid fa-lock"></i>
                                             </span>
-                                            <input type="password" className="form-control border-start-0" id="loginPassword" placeholder="Enter your password" required/>
+                                            <input type="password" className="form-control border-start-0 border-end-0" id="loginPassword" placeholder="Enter your password" required/>
+                                            <span className="input-group-text border-start-0 text-muted" id="togglePassword" style={{cursor: 'pointer'}}>
+                                                <i className="fa-regular fa-eye-slash" id="togglePasswordIcon"></i>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -73,7 +77,7 @@ function Login () {
                                     
                                     <div className="text-center">
                                         <span className="text-muted small">Don't have an account? </span>
-                                        <a href="register.html" className="small font-weight-bold">Register Here</a>
+                                        <NavLink to="/register" className="small font-weight-bold">Register Here</NavLink>
                                     </div>
                                 </form>
                             </div>
