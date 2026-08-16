@@ -1,12 +1,14 @@
-const records = [
+const Records = [
     {
+        "id": 1,
         "date": "2023-01-01",
-        "description": ["Whole Foods", "online payment"],
+        "description": "Whole Foods",
         "category": "Food",
         "type": "Expense",
         "amount": 50.00,
     },
     {
+        "id": 2,
         "date": "2023-01-01",
         "description": "Travelling blog",
         "category": "Traveling",
@@ -17,4 +19,4 @@ const records = [
 ]
 
 
-export default records;
+export default Records;

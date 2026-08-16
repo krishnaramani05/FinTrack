@@ -1,10 +1,56 @@
 import {NavLink} from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import '../assets/css/base.css'
 import '../assets/css/transactions.css'
 import profile from '../assets/images/avatar-1.jpg'
+import Records from '../db.js'
 import TransactionRecords from '../components/TransactionRecords.jsx'
 
 function Transactions () {
+
+    const [transactionRecords, setTransactionRecords] = useState(Records);
+
+    const [formData, setFormData] = useState({
+        title: '',
+        type: 'expense',
+        category: 'food',
+        amount: '',
+        date: '',
+        notes: '',
+    })
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        })
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const newTransaction = {
+            id: Date.now(),
+            date: formData.date,
+            title: formData.title,
+            category: formData.category,
+            type: formData.type,
+            amount: Number(formData.amount),
+            notes: formData.notes
+        };
+
+        setTransactionRecords((previousRecords) => [
+            ...previousRecords,
+            newTransaction
+        ]);
+
+        console.log("New transaction:", newTransaction);
+    };
+
+    const handleDelete = (id) => {
+        setTransactionRecords((previousRecords) => 
+            previousRecords.filter((record) => record.id !== id)
+        );
+    }
 
     return (
         <>
@@ -145,14 +191,14 @@ function Transactions () {
                                 <thead>
                                     <tr>
                                         <th>Date</th>
-                                        <th>Description</th>
+                                        <th>Title</th>
                                         <th>Category</th>
                                         <th>Type</th>
                                         <th>Amount</th>
                                         <th className="text-end">Actions</th>
                                     </tr>
                                 </thead>
-                                <TransactionRecords />
+                                <TransactionRecords records={transactionRecords} onDelete={handleDelete} />
                             </table>
                         </div>
 
@@ -172,30 +218,30 @@ function Transactions () {
             </div>
 
             {/* ADD TRANSACTION MODAL */}
-            <div className="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionLabel" aria-hidden="true">
+            <div className="modal fade" id="addTransactionModal" tabIndex="-1" aria-labelledby="addTransactionLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content glass-card-no-hover" style={{ border: "1px solid rgba(255, 255, 255, 0.15)" }}>
                         <div className="modal-header border-bottom border-secondary">
                             <h5 className="modal-title" id="addTransactionLabel">Add Transaction</h5>
-                            <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" className="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form>
+                        <form method="post" onSubmit={handleSubmit}>
                             <div className="modal-body">
                                 <div className="mb-3">
-                                    <label htmlFor="addTitle" className="form-label">Description / Merchant</label>
-                                    <input type="text" className="form-control" id="addTitle" placeholder="e.g. Whole Foods, Freelance Salary" required/>
+                                    <label htmlFor="title" className="form-label">Title</label>
+                                    <input type="text" name="title" onChange={handleChange} value={formData.title} className="form-control" id="title" placeholder="e.g. Whole Foods, Freelance Salary" required/>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="col-md-6">
-                                        <label htmlFor="addType" className="form-label">Transaction Type</label>
-                                        <select className="form-select" id="addType">
+                                        <label htmlFor="type" className="form-label">Transaction Type</label>
+                                        <select name="type" onChange={handleChange} value={formData.type} className="form-select" id="type">
                                             <option value="expense">Expense</option>
                                             <option value="income">Income</option>
                                         </select>
                                     </div>
                                     <div className="col-md-6">
-                                        <label htmlFor="addCategory" className="form-label">Category</label>
-                                        <select className="form-select" id="addCategory">
+                                        <label htmlFor="category" className="form-label">Category</label>
+                                        <select name="category" onChange={handleChange} value={formData.category} className="form-select" id="category">
                                             <option value="food">Food & Dining</option>
                                             <option value="rent">Rent / Housing</option>
                                             <option value="utility">Utilities</option>
@@ -207,17 +253,17 @@ function Transactions () {
                                 </div>
                                 <div className="row mb-3">
                                     <div className="col-md-6">
-                                        <label htmlFor="addAmount" className="form-label">Amount ($)</label>
-                                        <input type="number" step="0.01" className="form-control" id="addAmount" placeholder="0.00" required/>
+                                        <label htmlFor="amount" className="form-label">Amount ($)</label>
+                                        <input type="number" name="amount" onChange={handleChange} value={formData.amount} step="1" min="1" className="form-control" id="amount" placeholder="1" required/>
                                     </div>
                                     <div className="col-md-6">
-                                        <label htmlFor="addDate" className="form-label">Transaction Date</label>
-                                        <input type="date" className="form-control" id="addDate" required/>
+                                        <label htmlFor="date" className="form-label">Transaction Date</label>
+                                        <input type="date" name="date" onChange={handleChange} value={formData.date} className="form-control" id="date" required/>
                                     </div>
                                 </div>
                                 <div className="mb-3">
-                                    <label htmlFor="addNotes" className="form-label">Additional Notes</label>
-                                    <textarea className="form-control" id="addNotes" rows="2" placeholder="Brief payment notes or references..."></textarea>
+                                    <label htmlFor="notes" className="form-label">Additional Notes</label>
+                                    <textarea name="notes" onChange={handleChange} value={formData.notes} className="form-control" id="notes" placeholder="Brief payment notes or references..."></textarea>
                                 </div>
                             </div>
                             <div className="modal-footer border-top border-secondary">
@@ -230,7 +276,7 @@ function Transactions () {
             </div>
 
             {/* EDIT TRANSACTION MODAL */}
-            <div className="modal fade" id="editTransactionModal" tabindex="-1" aria-labelledby="editTransactionLabel" aria-hidden="true">
+            {/* <div className="modal fade" id="editTransactionModal" tabIndex="-1" aria-labelledby="editTransactionLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content glass-card-no-hover" style={{ border: "1px solid rgba(255, 255, 255, 0.15)" }}>
                         <div className="modal-header border-bottom border-secondary">
@@ -285,10 +331,10 @@ function Transactions () {
                         </form>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* DELETE TRANSACTION CONFIRMATION MODAL */}
-            <div className="modal fade" id="deleteTransactionModal" tabindex="-1" aria-labelledby="deleteTransactionLabel" aria-hidden="true">
+            {/* <div className="modal fade" id="deleteTransactionModal" tabIndex="-1" aria-labelledby="deleteTransactionLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered modal-sm">
                     <div className="modal-content glass-card-no-hover" style={{ border: "1px solid rgba(255, 255, 255, 0.15)" }}>
                         <div className="modal-header border-bottom border-secondary">
@@ -305,7 +351,7 @@ function Transactions () {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
         </>
     )
 
