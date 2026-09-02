@@ -1,0 +1,11 @@
+.fill-healthy {
+    background: #20c997;
+}
+
+.fill-warning {
+    background: #ffc107;
+}
+
+.fill-danger {
+    background: #dc3545;
+}

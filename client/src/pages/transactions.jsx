@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import '../assets/css/base.css'
 import '../assets/css/transactions.css'
-import Records from '../db.js'
+import { Records} from '../db.js'
 import TransactionRecords from '../components/TransactionRecords.jsx'
 import Form from '../components/Form.jsx'
 import Sidebar from '../components/Sidebar.jsx'
@@ -125,7 +125,7 @@ function Transactions () {
         const matchesSearch = record.title.toLowerCase().includes(search);
         const matchesType = type === '' || record.type.toLowerCase() === type.toLowerCase();
         const matchesCategory = category === '' || record.category.toLowerCase() === category.toLowerCase();
-
+        
         return matchesSearch && matchesType && matchesCategory;
     });
     
