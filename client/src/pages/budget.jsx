@@ -7,14 +7,26 @@ import profile from '../assets/images/avatar-1.jpg'
 import {BudgetRecords, Records, GoalRecords} from '../db.js'
 import CategoryBudget from '../components/CategoryBudget.jsx'
 import FinancialGoal from '../components/FinancialGoal.jsx'
+import GoalForm from '../components/GoalForm.jsx'
+import MonthlyBudget from '../components/MonthlyBudget.jsx'
+
 
 
 function Budget () {
 
     const [selectedMonth, setSelectedMonth] = useState("2026-07");
     const [goals, setGoals] = useState(GoalRecords);
+    const [editingGoal, setEditingGoal] = useState(null);
+    const [budgetForm, setBudgetForm] = useState({});
+    const [budgetRecords, setBudgetRecords] = useState(BudgetRecords);
+    const [formData, setFormData] = useState({
+        title: '',
+        targetAmount: '',
+        currentAmount: 0,
+        date: ''
+    });
 
-    const months = BudgetRecords.filter(
+    const months = budgetRecords.filter(
         (budget) => budget.month === selectedMonth
     );
 
@@ -22,10 +34,10 @@ function Budget () {
         (record) => record.date.startsWith(selectedMonth)
     );
 
+    // Monthly Budget Calculation
     const monthlyBudget = months.reduce(
         (total, budget) => total + budget.limit,0
     );
-
 
     const monthlyExpenses = Records.filter((record) => {
             const date = record.date.startsWith(selectedMonth)
@@ -37,6 +49,7 @@ function Budget () {
 
     const remainingBudget = monthlyBudget - totalSpent;
 
+    // Category Budgets
     const categories = [
         ...new Set(
             records.filter(record => record.category && record.type.toLowerCase() === "expense")
@@ -88,18 +101,134 @@ function Budget () {
         };
     })
 
+    const budgetCategories = [
+        "food",
+        "house",
+        "utility",
+        "entertainment",
+        "shopping",
+        "traveling",
+        "salary",
+        "other"
+    ];
 
+    // Financial Goals 
     const financial = goals.map((goal) => {
 
-        const percentage = (goal.saved / goal.target) * 100;
+        const percentage = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
         return {
-                title: goal.title,
-                target: goal.target,
-                saved: goal.saved,
-                date: goal.targetDate,
-                percentage: percentage.toFixed(0),
+            id: goal.id,
+            title: goal.title,
+            targetAmount: goal.targetAmount,
+            currentAmount: goal.currentAmount,
+            date: goal.date,
+            percentage: percentage.toFixed(0),
         };
     })
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        })
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (editingGoal === null) {
+            //create
+            const newGoal = {
+                id: Date.now(),
+                title: formData.title,
+                targetAmount: parseFloat(formData.targetAmount),
+                currentAmount: parseFloat(formData.currentAmount),
+                date: formData.date,
+            };
+            setGoals((previousGoals) => [...previousGoals, newGoal]);
+        }
+        else{
+            const updatedGoal = {
+                id: editingGoal,
+                title: formData.title,
+                targetAmount: parseFloat(formData.targetAmount),
+                currentAmount: parseFloat(formData.currentAmount),
+                date: formData.date,
+            };
+            setGoals(previousGoals => previousGoals.map(goal => goal.id === editingGoal ? updatedGoal : goal));
+            console.log("Updated goal:", updatedGoal);
+        }
+    }
+
+    const handleEdit = (id) => {
+        const edit = goals.find((goal) => goal.id === id);
+        if (!edit) return;
+        setEditingGoal(id);
+
+        setFormData({
+            title: edit.title,
+            targetAmount: edit.targetAmount,
+            currentAmount: edit.currentAmount,
+            date: edit.date,
+        });
+    }
+
+    const handleNewGoal = () => {
+        setEditingGoal(null);
+
+        setFormData({
+            title: '',
+            targetAmount: '',
+            currentAmount: 0,
+            date: ''
+        });
+    };
+
+
+    // Budget Form
+    const handleBudgetChange = (e) => {
+        setBudgetForm({
+            ...budgetForm,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    useEffect(() => {
+        const newBudgetForm = {};
+
+        budgetCategories.forEach((category) => {
+            const existingBudget = months.find(
+                (budget) =>
+                    budget.category.toLowerCase() === category
+            );
+
+            newBudgetForm[category] = existingBudget
+                ? existingBudget.limit
+                : "";
+        });
+
+        setBudgetForm(newBudgetForm);
+    }, [selectedMonth]);
+
+
+    const handleBudgetSubmit = (e) => {
+        e.preventDefault();
+        const updatedBudgets = budgetRecords.map((budget) => {
+            if (budget.month === selectedMonth) {
+                const newLimit = budgetForm[budget.category];
+                return {
+                    ...budget,
+                    limit: parseFloat(newLimit) || 0
+                };
+            }
+            return budget;
+        });
+
+        setBudgetRecords(updatedBudgets);
+        const closeButton = document.getElementById("closeBudgetModal");
+        if (closeButton) {
+            closeButton.click();
+        }
+    };
 
     return (
         <>
@@ -137,7 +266,7 @@ function Budget () {
                                 <button className="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#manageBudgetModal">
                                     <i className="fa-solid fa-gear me-2"></i>Configure Budgets
                                 </button>
-                                <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                                <button onClick={handleNewGoal} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGoalModal">
                                     <i className="fa-solid fa-plus me-2"></i>New Goal
                                 </button>
                             </div>
@@ -145,39 +274,29 @@ function Budget () {
 
                         {/* Stat Summary Cards Grid */} 
                         <section className="row g-4 mb-4 animate-fade-in" style={{animationDelay: '0.05s'}}>
-                            {/* Card 1: Monthly Budget */}
-                            <div className="col-md-4">
-                                <div className="glass-card stat-card balance-theme">
-                                    <div className="stat-icon-wrapper">
-                                        <i className="fa-solid fa-wallet"></i>
-                                    </div>
-                                    <small className="text-muted d-block text-uppercase fw-semibold tracking-wider">Monthly Budget</small>
-                                    <div className="card-amount" id="monthlyBudgetAmount">${monthlyBudget.toFixed(2)}</div>
-                                    <span className="small text-muted">Total monthly limit</span>
-                                </div>
-                            </div>
-                            {/* Card 2: Total Spent */}
-                            <div className="col-md-4">
-                                <div className="glass-card stat-card expense-theme">
-                                    <div className="stat-icon-wrapper">
-                                        <i className="fa-solid fa-credit-card"></i>
-                                    </div>
-                                    <small className="text-muted d-block text-uppercase fw-semibold tracking-wider">Total Spent</small>
-                                    <div className="card-amount" id="totalSpentAmount">${totalSpent.toFixed(2)}</div>
-                                    <span className="small text-danger" id="totalSpentIndicator"><i className="fa-solid fa-circle-exclamation me-1"></i>53% Utilized</span>
-                                </div>
-                            </div>
-                            {/* Card 3: Remaining Budget */}
-                            <div className="col-md-4">
-                                <div className="glass-card stat-card income-theme">
-                                    <div className="stat-icon-wrapper">
-                                        <i className="fa-solid fa-piggy-bank"></i>
-                                    </div>
-                                    <small className="text-muted d-block text-uppercase fw-semibold tracking-wider">Remaining Budget</small>
-                                    <div className="card-amount" id="remainingBudgetAmount">${remainingBudget.toFixed(2)}</div>
-                                    <span className="small text-success" id="remainingBudgetIndicator"><i className="fa-solid fa-circle-check me-1"></i>Healthy balance</span>
-                                </div>
-                            </div>
+                            <MonthlyBudget
+                                icon="fa-wallet"
+                                title="Monthly Budget"
+                                amount={monthlyBudget}
+                                description="Total monthly limit"
+                                theme="balance-theme"
+                            />
+                            
+                            <MonthlyBudget
+                                icon="fa-credit-card"
+                                title="Total Spent"
+                                amount={totalSpent}
+                                description="Total spent this month"
+                                theme="expense-theme"
+                            />
+
+                            <MonthlyBudget
+                                icon="fa-piggy-bank"
+                                title="Remaining Budget"
+                                amount={remainingBudget}
+                                description="Healthy balance"
+                                theme="income-theme"
+                            />
                         </section>
 
                         {/* Main Split Layout: Budgets (Left) and Goals (Right) */}
@@ -197,6 +316,7 @@ function Budget () {
                                             category = {budget.category}
                                             limit = {budget.limit}
                                             status = {budget.status}
+                                            selectedMonth={selectedMonth}
                                         />
                                     ))}   
                                 </div>
@@ -211,55 +331,16 @@ function Budget () {
                                     </div>
                                     {financial.map((goal) => (
                                         <FinancialGoal
+                                            key={goal.id}
+                                            id={goal.id}
                                             title = {goal.title}
-                                            target = {goal.target}
-                                            saved = {goal.saved}
+                                            targetAmount = {goal.targetAmount}
+                                            currentAmount = {goal.currentAmount}
                                             percentage = {goal.percentage}
                                             date = {goal.date}
+                                            onEdit={handleEdit}
                                         />
                                     ))}
-
-                                    {/* Goal Item 1: Emergency Fund */}
-                                    {/* <div className="p-3 rounded-4 bg-dark border border-secondary mb-3">
-                                        <div className="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <span className="fw-bold text-white d-block">Emergency Fund Goal</span>
-                                                <small className="text-muted">Target: Oct 2026</small>
-                                            </div>
-                                            <span className="fs-5 fw-bold text-secondary">65% Done</span>
-                                        </div>
-                                        <div className="budget-header small text-muted mb-1">
-                                            <span>Current: $6,500.00</span>
-                                            <span>Target: $10,000.00</span>
-                                        </div>
-                                        <div className="progress-bar-custom mb-3">
-                                            <div className="progress-fill" style={{width: '65%', background: 'var(--accent-secondary)'}}></div>
-                                        </div>
-                                        <button className="btn btn-sm btn-outline-custom w-100" data-bs-toggle="modal" data-bs-target="#editGoalModal">
-                                            <i className="fa-solid fa-coins me-1"></i>Deposit Funds / Adjust Goal
-                                        </button>
-                                    </div> */}
-
-                                    {/* Goal Item 2: Macbook Pro */}
-                                    {/* <div className="p-3 rounded-4 bg-dark border border-secondary mb-0">
-                                        <div className="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <span className="fw-bold text-white d-block">New Macbook Pro M3</span>
-                                                <small className="text-muted">Target: Dec 2026</small>
-                                            </div>
-                                            <span className="fs-5 fw-bold text-secondary">80% Done</span>
-                                        </div>
-                                        <div className="budget-header small text-muted mb-1">
-                                            <span>Current: $1,200.00</span>
-                                            <span>Target: $1,500.00</span>
-                                        </div>
-                                        <div className="progress-bar-custom mb-3">
-                                            <div className="progress-fill" style={{width: '80%', background: 'var(--accent-secondary)'}}></div>
-                                        </div>
-                                        <button className="btn btn-sm btn-outline-custom w-100" data-bs-toggle="modal" data-bs-target="#editGoalModal">
-                                            <i className="fa-solid fa-coins me-1"></i>Deposit Funds / Adjust Goal
-                                        </button>
-                                    </div> */}
                                 </div>
                             </div>
                         </section>
@@ -267,117 +348,46 @@ function Budget () {
                 </div>
 
                 {/* CONFIGURE BUDGET MODAL */}
-                <div className="modal fade" id="manageBudgetModal" tabindex="-1" aria-labelledby="manageBudgetLabel" aria-hidden="true">
+                <div className="modal fade" id="manageBudgetModal" tabIndex="-1" aria-labelledby="manageBudgetLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content glass-card-no-hover" style={{border: '1px solid rgba(255, 255, 255, 0.15)'}}>
                             <div className="modal-header border-bottom border-secondary">
                                 <h5 className="modal-title" id="manageBudgetLabel">Configure Category Budgets</h5>
                                 <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <form>
-                                <div className="modal-body">
-                                    <p className="text-muted small">Update your monthly spending thresholds for each primary category below:</p>
-                                    <div className="mb-3">
-                                        <label htmlFor="budFood" className="form-label">Food & Dining Limit ($)</label>
-                                        <input type="number" className="form-control" id="budFood" value="500"/>
+                            <form onSubmit={handleBudgetSubmit}>
+                                {budgetCategories.map((category) => (
+                                    <div className="mb-3" key={category}>
+                                        <label htmlFor={category} className="form-label"> {category} Limit ($) </label>
+                                        <input
+                                            type="number"
+                                            name={category}
+                                            className="form-control"
+                                            id={category}
+                                            value={budgetForm[category] ?? ""}
+                                            onChange={handleBudgetChange}
+                                            step="1" min="1"
+                                            required
+                                        />
                                     </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="budRent" className="form-label">Rent / Housing Limit ($)</label>
-                                        <input type="number" className="form-control" id="budRent" value="1200"/>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="budUtil" className="form-label">Utilities Limit ($)</label>
-                                        <input type="number" className="form-control" id="budUtil" value="300"/>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="budEnt" className="form-label">Entertainment Limit ($)</label>
-                                        <input type="number" className="form-control" id="budEnt" value="400"/>
-                                    </div>
-                                </div>
+                                ))}
                                 <div className="modal-footer border-top border-secondary">
                                     <button type="button" className="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" className="btn btn-primary">Save Limits</button>
+                                    <button type="submit" data-bs-dismiss="modal" className="btn btn-primary">Save Limits</button>
+                                    <button type="button" id="closeBudgetModal" data-bs-dismiss="modal" className="d-none"></button>
                                 </div>
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>  
 
                 {/* NEW GOAL MODAL */}
-                <div className="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content glass-card-no-hover" style={{border: '1px solid rgba(255, 255, 255, 0.15)'}}>
-                            <div className="modal-header border-bottom border-secondary">
-                                <h5 className="modal-title" id="addGoalLabel">Add New Savings Goal</h5>
-                                <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form>
-                                <div className="modal-body">
-                                    <div className="mb-3">
-                                        <label htmlFor="goalTitle" className="form-label">Goal Name</label>
-                                        <input type="text" className="form-control" id="goalTitle" placeholder="e.g. Dream Vacation, Down Payment" required/>
-                                    </div>
-                                    <div className="row mb-3">
-                                        <div className="col-md-6">
-                                            <label htmlFor="goalTarget" className="form-label">Target Amount ($)</label>
-                                            <input type="number" className="form-control" id="goalTarget" placeholder="0.00" required/>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label htmlFor="goalStart" className="form-label">Initial Balance ($)</label>
-                                            <input type="number" className="form-control" id="goalStart" placeholder="0" value="0"/>
-                                        </div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="goalDate" className="form-label">Target Completion Date</label>
-                                        <input type="date" className="form-control" id="goalDate" required/>
-                                    </div>
-                                </div>
-                                <div className="modal-footer border-top border-secondary">
-                                    <button type="button" className="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" className="btn btn-primary">Create Goal</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                {/* EDIT GOAL MODAL */}
-                <div className="modal fade" id="editGoalModal" tabindex="-1" aria-labelledby="editGoalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content glass-card-no-hover" style={{border: '1px solid rgba(255, 255, 255, 0.15)'}}>
-                            <div className="modal-header border-bottom border-secondary">
-                                <h5 className="modal-title" id="editGoalLabel">Deposit Funds / Edit Goal</h5>
-                                <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form>
-                                <div className="modal-body">
-                                    <div className="p-3 bg-dark border border-secondary rounded-4 mb-3 text-center">
-                                        <span className="text-muted d-block small mb-1">Emergency Fund Goal</span>
-                                        <span className="fs-3 fw-bold text-white">$6,500.00 / $10,000.00</span>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="depositAmount" className="form-label">Deposit Amount ($)</label>
-                                        <input type="number" className="form-control" id="depositAmount" placeholder="e.g. 200.00"/>
-                                        <small className="text-muted">This amount will be added to the current savings goal progress.</small>
-                                    </div>
-                                    <hr className="border-secondary my-3"/>
-                                    <div className="mb-3">
-                                        <label htmlFor="editGoalName" className="form-label">Adjust Goal Name</label>
-                                        <input type="text" className="form-control" id="editGoalName" value="Emergency Fund Goal"/>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="editGoalTarget" className="form-label">Adjust Target ($)</label>
-                                        <input type="number" className="form-control" id="editGoalTarget" value="10000"/>
-                                    </div>
-                                </div>
-                                <div className="modal-footer border-top border-secondary">
-                                    <button type="button" className="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" className="btn btn-secondary">Save Changes</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <GoalForm
+                    formData={formData}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                    isEditing={editingGoal !== null}
+                />
         </>
     )
 }

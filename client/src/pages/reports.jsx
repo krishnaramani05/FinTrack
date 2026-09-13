@@ -1,18 +1,89 @@
 import {NavLink} from 'react-router-dom';
+import { BarChart, Bar, Area, XAxis, YAxis, CartesianGrid, LabelList, Legend, ResponsiveContainer, PieChart, Pie } from "recharts";
+import {useState} from "react";
 import "../assets/css/base.css";
 import "../assets/css/reports.css";
 import profile from "../assets/images/avatar-1.jpg";
+import {Records, GoalRecords} from "../db.js" 
+import Sidebar from '../components/Sidebar.jsx';
 
 
 function Reports () {
 
+    const [selectedMonth, setSelectedMonth] = useState("2026-06");
+    const [includeCharts, setIncludeCharts] = useState(true);
+    const [insightFocus, setInsightFocus] = useState("General Spending Audit");
+
+    const handleInsightFocus = (e) => {
+        setInsightFocus(e.target.value);
+    }
+
+    const monthlyRecords = Records.filter((record) =>
+        record.date.startsWith(selectedMonth)
+    );
+
+    const totalIncome = monthlyRecords
+        .filter((record) => record.type.toLowerCase() === "income")
+        .reduce((total, record) => total + record.amount, 0);
+
+    const totalExpenses = monthlyRecords
+        .filter((record) => record.type.toLowerCase() === "expense")
+        .reduce((total, record) => total + record.amount, 0);
+
+    const savings = totalIncome - totalExpenses;
+
+    const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
+
+    const months = [];
+
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date(selectedMonth + "-01");
+        date.setMonth(date.getMonth() - i);
+
+        months.push({
+            value: date.toISOString().slice(0, 7),
+            name: date.toLocaleString("en-US", { month: "short" })
+        });
+    }
+
+    const monthlyAnalytics = months.map((month) => {
+        const income = Records
+            .filter(
+            (record) =>
+                record.date.startsWith(month.value) &&
+                record.type.toLowerCase() === "income"
+            )
+            .reduce((total, record) => total + record.amount, 0);
+
+        const expenses = Records
+            .filter(
+            (record) =>
+                record.date.startsWith(month.value) &&
+                record.type.toLowerCase() === "expense"
+            )
+            .reduce((total, record) => total + record.amount, 0);
+
+        return {
+            month: month.name,
+            income,
+            expenses,
+            savings: income - expenses
+        };
+    });
+
+    const totalGoalSavings = GoalRecords.reduce(
+        (total, goal) => total + goal.currentAmount,0
+    );
+
+    
+
     return (
         <>
             {/* Hidden CSS Toggle Checkboxes */}
-            <input type="checkbox" id="sidebarToggleCheck" className="d-none"/>
+            {/* <input type="checkbox" id="sidebarToggleCheck" className="d-none"/> */}
 
             {/* Mobile Header (Visible on small screens) */}
-            <div className="mobile-header">
+            {/* <div className="mobile-header">
                 <div className="d-flex align-items-center gap-2">
                     <div className="logo-icon" style={{width: "32px", height: "32px", borderRadius: "8px"}}>
                         <i className="fa-solid fa-wallet text-white fs-6"></i>
@@ -22,67 +93,11 @@ function Reports () {
                 <label htmlFor="sidebarToggleCheck" className="btn btn-outline-custom p-2 cursor-pointer" id="sidebarToggle">
                     <i className="fa-solid fa-bars"></i>
                 </label>
-            </div>
+            </div> */}
 
             <div className="app-container">
                 {/* SIDEBAR */}
-                <aside className="sidebar" id="sidebar">
-                    <div className="logo-area">
-                        <div className="logo-icon">
-                            <i className="fa-solid fa-wallet text-white fs-5"></i>
-                        </div>
-                        <h2 className="logo-text m-0">FinTrack</h2>
-                    </div>
-
-                    <nav className="w-100 mb-4">
-                        <ul className="nav-menu p-0 m-0">
-                            <li>
-                                <NavLink to="/dashboard" className="nav-item-link">
-                                    <i className="fa-solid fa-chart-pie"></i>
-                                    <span>Dashboard</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/transactions" className="nav-item-link">      
-                                    <i className="fa-solid fa-list-check"></i>
-                                    <span>Transactions</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/budget" className="nav-item-link">
-                                    <i className="fa-solid fa-wallet"></i>
-                                    <span>Budgets & Goals</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/reports" className="nav-item-link">
-                                    <i className="fa-solid fa-circle-nodes"></i>
-                                    <span>Reports & AI</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/settings" className="nav-item-link">
-                                    <i className="fa-solid fa-gear"></i>
-                                    <span>Settings</span>
-                                </NavLink>
-                            </li>
-                        </ul>
-                    </nav>
-
-                    <div className="user-profile-section">
-                        <div className="user-card mb-3">
-                            <img src={profile} alt="User Avatar" className="user-avatar" id="sidebarAvatar"/>
-                            <div className="overflow-hidden">
-                                <h6 className="m-0 text-truncate text-white" id="sidebarName">Sophia Miller</h6>
-                                <small className="text-muted text-truncate d-block" id="sidebarPlan">Premium Plan</small>
-                            </div>
-                        </div>
-                        <NavLink to="/login" className="nav-item-link p-2 text-danger bg-transparent" style={{border: "none"}}>
-                            <i className="fa-solid fa-right-from-bracket"></i>
-                            <span>Logout</span>
-                        </NavLink>
-                    </div>
-                </aside>
+                <Sidebar />
 
                 {/* MAIN LAYOUT */}
                 <main className="main-content">
@@ -94,7 +109,7 @@ function Reports () {
                         </div>
                         <div className="d-flex gap-2">
                             {/* PDF Export trigger using browser print + print media stylesheet rules */}
-                            <button className="btn btn-secondary">
+                            <button className="btn btn-info report-export-btn" onClick={() => window.print()}>
                                 <i className="fa-solid fa-file-pdf me-2"></i>Export to PDF
                             </button>
                         </div>
@@ -105,25 +120,22 @@ function Reports () {
                         <div className="row g-3 align-items-center">
                             <div className="col-md-3">
                                 <label className="form-label text-muted small text-uppercase">Report Period</label>
-                                <select className="form-select">
-                                    <option>June 2026 (Last Month)</option>
-                                    <option>May 2026</option>
-                                    <option>April 2026</option>
-                                    <option>Q2 2026 Summary</option>
-                                </select>
+                                <div className="d-flex align-items-center bg-white border rounded-4 px-2 py-1 shadow-sm" style={{borderColor: 'rgba(124, 34, 229, 0.15) !important'}}>
+                                    <i className="fa-solid fa-calendar-days text-primary px-2"></i>
+                                    <input type='month' value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="form-control border-0 bg-transparent py-1 px-1 fs-6 fw-bold" />
+                                </div>
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label text-muted small text-uppercase">Insight Focus</label>
-                                <select className="form-select">
+                                <select onChange={handleInsightFocus} title="InsightFocus" className="form-select">
                                     <option>General Spending Audit</option>
                                     <option>Savings & Goals Optimization</option>
-                                    <option>Subscription Clean-Up</option>
                                 </select>
                             </div>
                             <div className="col-md-4 mt-md-4 pt-md-2">
                                 <div className="form-check form-switch m-0 pt-2">
-                                    <input className="form-check-input" type="checkbox" id="includeCharts" checked/>
-                                    <label className="form-check-label text-white small" for="includeCharts">Include charts in printed statement</label>
+                                    <input className="form-check-input" type="checkbox" id="includeCharts"  checked={includeCharts} onChange={(e) => setIncludeCharts(e.target.checked)}/>
+                                    <label className="form-check-label text-dark small" for="includeCharts">Include charts in printed statement</label>
                                 </div>
                             </div>
                             <div className="col-md-2 text-md-end mt-md-4 pt-md-2">
@@ -156,7 +168,7 @@ function Reports () {
                                 <div className="ai-summary-box my-3">
                                     <h5 className="mb-2 fs-6">1. Executive Overview</h5>
                                     <p className="text-muted small">
-                                        During the month of June 2026, you recorded a total gross income of <strong>$5,800.00</strong> and total expenses of <strong>$2,410.20</strong>, yielding a net savings rate of <strong>58.4%</strong>. This represents a solid month of saving, comfortably exceeding the recommended 20% standard savings rule.
+                                        During the month of {selectedMonth}, you recorded a total gross income of <strong>${totalIncome}</strong> and total expenses of <strong>${totalExpenses}</strong>, yielding a net savings rate of <strong>58.4%</strong>. This represents a solid month of saving, comfortably exceeding the recommended 20% standard savings rule.
                                     </p>
                                 </div>
 
@@ -184,52 +196,94 @@ function Reports () {
 
                         {/* Print-ready visual chart data */}
                         <div className="col-lg-5">
-                            <div className="glass-card-no-hover p-4 h-100 d-flex flex-column justify-content-between">
-                                <div>
-                                    <h4 className="fs-5 mb-1">Monthly Summary Analytics</h4>
-                                    <p className="text-muted small mb-4">Visual chart tracking of June cash flow metrics.</p>
-                                </div>
-                                
-                                {/* Print Visual Chart Canvas (Static SVG) */}
-                                <div className="my-auto" style={{position: "relative", height: "250px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                    <svg viewBox="0 0 350 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                        {/* Grid Lines */}
-                                        <line x1="60" y1="20" x2="330" y2="20" stroke="rgba(124, 34, 229, 0.05)" stroke-width="1" />
-                                        <line x1="60" y1="70" x2="330" y2="70" stroke="rgba(124, 34, 229, 0.05)" stroke-width="1" />
-                                        <line x1="60" y1="120" x2="330" y2="120" stroke="rgba(124, 34, 229, 0.05)" stroke-width="1" />
-                                        <line x1="60" y1="170" x2="330" y2="170" stroke="rgba(124, 34, 229, 0.05)" stroke-width="1" />
-
-                                        {/* Y Axis Labels */}
-                                        <text x="50" y="24" font-family="'Outfit', sans-serif" font-size="11" fill="#6b7280" text-anchor="end">$6,000</text>
-                                        <text x="50" y="74" font-family="'Outfit', sans-serif" font-size="11" fill="#6b7280" text-anchor="end">$4,000</text>
-                                        <text x="50" y="124" font-family="'Outfit', sans-serif" font-size="11" fill="#6b7280" text-anchor="end">$2,000</text>
-                                        <text x="50" y="174" font-family="'Outfit', sans-serif" font-size="11" fill="#6b7280" text-anchor="end">$0</text>
-
-                                        {/* Bars */}
-                                        <rect x="95" y="25" width="36" height="145" rx="6" fill="#10b981" opacity="0.85" />
-                                        <rect x="175" y="110" width="36" height="60" rx="6" fill="#f43f5e" opacity="0.85" />
-                                        <rect x="255" y="85" width="36" height="85" rx="6" fill="#00b4d8" opacity="0.85" />
-
-                                        {/* Value Labels on Top of Bars */}
-                                        <text x="113" y="18" font-family="'Outfit', sans-serif" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">$5.8K</text>
-                                        <text x="193" y="103" font-family="'Outfit', sans-serif" font-size="10" font-weight="bold" fill="#f43f5e" text-anchor="middle">$2.4K</text>
-                                        <text x="273" y="78" font-family="'Outfit', sans-serif" font-size="10" font-weight="bold" fill="#00b4d8" text-anchor="middle">$3.4K</text>
-
-                                        {/* X Axis Labels */}
-                                        <text x="113" y="192" font-family="'Outfit', sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle">Income</text>
-                                        <text x="193" y="192" font-family="'Outfit', sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle">Expenses</text>
-                                        <text x="273" y="192" font-family="'Outfit', sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle">Savings</text>
-                                    </svg>
-                                </div>
-
-                                <div className="mt-4 pt-3 border-top border-secondary">
-                                    <div className="d-flex justify-content-between text-muted small mb-2">
-                                        <span>Savings Rate</span>
-                                        <span className="fw-bold">58.4%</span>
+                            <div className={includeCharts ? "print-chart" : "print-hide-chart"}>
+                                <div className="glass-card-no-hover p-4 h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h4 className="fs-5 mb-1">Monthly Summary Analytics</h4>
+                                        <p className="text-muted small mb-4">Monthly income, expenses, and savings for the selected period.</p>
                                     </div>
-                                    <div className="d-flex justify-content-between text-muted small">
-                                        <span>Invested Amount</span>
-                                        <span className="fw-bold">$1,200.00</span>
+                                    
+                                    {/* Graph */}
+                                    <div className="my-auto" style={{ width: "100%", height: "300px" }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart
+                                                data={[
+                                                    {
+                                                        name: "Income",
+                                                        amount: totalIncome,
+                                                        fill: "#10b981"
+                                                    },
+                                                    {
+                                                        name: "Expenses",
+                                                        amount: totalExpenses,
+                                                        fill: "#ff3b5c"
+                                                    },
+                                                    {
+                                                        name: "Savings",
+                                                        amount: Math.max(savings, 0),
+                                                        fill: "#06b6d4"
+                                                    }
+                                                ]}
+                                                margin={{
+                                                    top: 30,
+                                                    right: 20,
+                                                    left: 10,
+                                                    bottom: 10
+                                                }}
+                                            >
+                                                <CartesianGrid
+                                                    strokeDasharray="3 3"
+                                                    vertical={false}
+                                                />
+
+                                                <XAxis
+                                                    dataKey="name"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                />
+
+                                                <YAxis
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tickFormatter={(value) => `$${value.toLocaleString()}`}
+                                                />
+
+                                                <Bar
+                                                    dataKey="amount"
+                                                    radius={[8, 8, 0, 0]}
+                                                    barSize={50}
+                                                    shape={(props) => (
+                                                        <rect
+                                                            x={props.x}
+                                                            y={props.y}
+                                                            width={props.width}
+                                                            height={props.height}
+                                                            rx={8}
+                                                            fill={props.payload.fill}
+                                                        />
+                                                    )}
+                                                >
+                                                    <LabelList
+                                                        dataKey="amount"
+                                                        position="top"
+                                                        formatter={(value) =>
+                                                            `$${Number(value).toLocaleString()}`
+                                                        }
+                                                    />
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                    <div className="mt-4 pt-3 border-top border-secondary">
+                                        <div className="d-flex justify-content-between text-muted small mb-2">
+                                            <span>Savings Rate</span>
+                                            <span className="fw-bold">{savingsRate.toFixed(1)}%</span>
+                                        </div>
+                                        <div className="d-flex justify-content-between text-muted small">
+                                            <span>Total Saved Toward Goals</span>
+                                            <span className="fw-bold">${totalGoalSavings}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -1,9 +1,31 @@
 import {NavLink} from 'react-router-dom';
+import React from "react";
+import { useEffect, useState } from "react";
 import profile from '../assets/images/avatar-1.jpg'
 
 
 
 function Sidebar () {
+
+    const [profileData, setProfileData] = useState({
+        name: "Sophia Miller",
+        avatar: profile
+    });
+
+    useEffect(() => {
+        const loadProfile = () => {
+            const savedProfile = localStorage.getItem("fintrackProfile");
+            if (savedProfile) {
+                const data = JSON.parse(savedProfile);
+                setProfileData(data);
+            }
+        };
+        loadProfile();
+        window.addEventListener("profileUpdated", loadProfile);
+        return () => {
+            window.removeEventListener("profileUpdated", loadProfile);
+        };
+    }, []);
 
     return (
         <>
@@ -52,9 +74,9 @@ function Sidebar () {
 
                 <div className="user-profile-section">
                     <div className="user-card mb-3">
-                        <img src={profile} alt="User Avatar" className="user-avatar" id="sidebarAvatar"/>
+                        <img src={profileData.avatar} alt="User Avatar" className="user-avatar" id="sidebarAvatar"/>
                         <div className="overflow-hidden">
-                            <h6 className="m-0 text-truncate text-white" id="sidebarName">Sophia Miller</h6>
+                            <h6 className="m-0 text-truncate text-white" id="sidebarName">{profileData.name}</h6>
                             <small className="text-muted text-truncate d-block" id="sidebarPlan">Premium Plan</small>
                         </div>
                     </div>

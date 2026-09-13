@@ -1,16 +1,115 @@
 import {NavLink} from 'react-router-dom';
+import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie } from "recharts";
 import '../assets/css/base.css'
 import '../assets/css/dashboard.css'
+import { useState } from 'react';
+import {Records} from '../db.js'
+import Sidebar from '../components/Sidebar.jsx'
+import MonthlyDashboard from '../components/MonthlyDashboard.jsx'
+import Calendar from '../components/Calendar.jsx'
+
 
 
 function Dashboard () {
+
+    const [selectedMonth, setSelectedMonth] = useState("2026-09");
+
+    const monthlyIncome = Records.filter((record) =>
+            record.date.startsWith(selectedMonth) &&
+            record.type.toLowerCase() === "income"
+        ).reduce((total, record) => total + record.amount, 0);
+    
+
+    const monthlyExpenses = Records.filter((record) =>
+        record.date.startsWith(selectedMonth) &&
+        record.type.toLowerCase() === "expense"
+    ).reduce((total, record) => total + record.amount, 0);
+
+    const totalBalance = monthlyIncome - monthlyExpenses;
+
+
+    // Donut Chart
+    const months = [];
+
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date(selectedMonth + "-01");
+        date.setMonth(date.getMonth() - i);
+
+        months.push({
+            value: date.toISOString().slice(0, 7),
+            name: date.toLocaleString("en-US", { month: "short" })
+        });
+    }
+
+    const expenseData = Records
+        .filter(record =>
+            record.type.toLowerCase() === "expense" &&
+            months.some(month => record.date.startsWith(month.value))
+        )
+        .reduce((data, record) => {
+            const existing = data.find(
+                item => item.category === record.category
+            );
+
+            if (existing) {
+                existing.amount += record.amount;
+            } else {
+                data.push({
+                    category: record.category,
+                    amount: record.amount,
+                    fill: ["#7c3aed", "#06b6d4", "#ff3b5c", "#f59e0b", "#10b981"][data.length]
+                });
+            }
+
+            return data;
+        },[]);
+        console.log(
+            "Records:",
+            Records.map(record => ({
+                date: record.date,
+                type: record.type,
+                category: record.category,
+                amount: record.amount
+            }))
+        );
+        console.log("Months:", months);
+        console.log("Expense Data:", expenseData
+    );
+
+    const totalExpenses = expenseData.reduce(
+        (total, item) => total + item.amount,0
+    );
+
+    // Flowchart
+    const flowData = months.map((month) => {
+        const income = Records
+            .filter(record =>
+            record.date.startsWith(month.value) &&
+            record.type.toLowerCase() === "income"
+            )
+            .reduce((total, record) => total + record.amount, 0);
+
+        const expenses = Records
+            .filter(record =>
+            record.date.startsWith(month.value) &&
+            record.type.toLowerCase() === "expense"
+            )
+            .reduce((total, record) => total + record.amount, 0);
+
+        return {
+            month: month.name,
+            income,
+            expenses
+        };
+    });
+
+
      return(
         <>
-            <h1>Dashboard</h1>
             {/* iOS-Style "Screen Time" Toast Notification Container */}
-            <div className="iphone-notification-container" id="iphoneNotificationContainer">
+            {/* <div className="iphone-notification-container" id="iphoneNotificationContainer"> */}
                 {/* iOS Notification Toast (Triggered on Load) */}
-                <div className="iphone-toast" id="screenTimeToast">
+                {/* <div className="iphone-toast" id="screenTimeToast">
                     <div className="iphone-app-icon">
                         <i className="fa-solid fa-clock"></i>
                     </div>
@@ -29,10 +128,10 @@ function Dashboard () {
                     <button className="iphone-toast-close" onclick="closeNotification('screenTimeToast')">
                         <i className="fa-solid fa-xmark"></i>
                     </button>
-                </div>
+                </div> */}
 
                 {/* iOS Notification Toast 2 (Triggered 2s later for visual demonstration) */}
-                <div className="iphone-toast" id="monthlySummaryToast" style={{display: 'none'}}>
+                {/* <div className="iphone-toast" id="monthlySummaryToast" style={{display: 'none'}}>
                     <div className="iphone-app-icon" style={{background: 'linear-gradient(135deg, #ffaa00, #ff5500)'}}>
                         <i className="fa-solid fa-brain"></i>
                     </div>
@@ -51,8 +150,8 @@ function Dashboard () {
                     <button className="iphone-toast-close" onclick="closeNotification('monthlySummaryToast')">
                         <i className="fa-solid fa-xmark"></i>
                     </button>
-                </div>
-            </div>
+                </div> */}
+            {/* </div> */}
 
             {/* Mobile Header (Visible on small screens) */}
             <div className="mobile-header">
@@ -69,63 +168,7 @@ function Dashboard () {
 
             <div className="app-container">
                 {/* SIDEBAR */}
-                <aside className="sidebar" id="sidebar">
-                    <div className="logo-area">
-                        <div className="logo-icon">
-                            <i className="fa-solid fa-wallet text-white fs-5"></i>
-                        </div>
-                        <h2 className="logo-text m-0">FinTrack</h2>
-                    </div>
-
-                    <nav className="w-100 mb-4">
-                        <ul className="nav-menu p-0 m-0">
-                            <li>
-                                <NavLink to="/dashboard" className="nav-item-link">
-                                    <i className="fa-solid fa-chart-pie"></i>
-                                    <span>Dashboard</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/transactions" className="nav-item-link">
-                                    <i className="fa-solid fa-list-check"></i>
-                                    <span>Transactions</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/budget" className="nav-item-link">
-                                    <i className="fa-solid fa-wallet"></i>
-                                    <span>Budgets & Goals</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/reports" className="nav-item-link">   
-                                    <i className="fa-solid fa-circle-nodes"></i>
-                                    <span>Reports & AI</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/settings" className="nav-item-link">
-                                    <i className="fa-solid fa-gear"></i>
-                                    <span>Settings</span>
-                                </NavLink>
-                            </li>
-                        </ul>
-                    </nav>
-
-                    <div className="user-profile-section">
-                        <div className="user-card mb-3">
-                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100" alt="User Avatar" className="user-avatar" id="sidebarAvatar"/>
-                            <div className="overflow-hidden">
-                                <h6 className="m-0 text-truncate text-white" id="sidebarName">Sophia Miller</h6>
-                                <small className="text-muted text-truncate d-block" id="sidebarPlan">Premium Plan</small>
-                            </div>
-                        </div>
-                        <NavLink to="/login" className="nav-item-link p-2 text-danger bg-transparent" style={{border: 'none'}}>
-                            <i className="fa-solid fa-right-from-bracket"></i>
-                            <span>Logout</span>
-                        </NavLink>
-                    </div>
-                </aside>
+                <Sidebar />
 
                 {/* MAIN LAYOUT */}
                 <main className="main-content">
@@ -136,6 +179,10 @@ function Dashboard () {
                             <p className="text-muted m-0">Here's a breakdown of your finances today.</p>
                         </div>
                         <div className="d-flex gap-2">
+                            <div className="d-flex align-items-center bg-white border rounded-4 px-2 py-1 shadow-sm" style={{borderColor: 'rgba(124, 34, 229, 0.15) !important'}}>
+                                <i className="fa-solid fa-calendar-days text-primary px-2"></i>
+                                <input type='month' value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="form-control border-0 bg-transparent py-1 px-1 fs-6 fw-bold" />
+                            </div>
                             <button className="btn btn-outline-custom" onclick="triggerNotificationSim()">
                                 <i className="fa-solid fa-bell me-2"></i>Test Notifications
                             </button>
@@ -147,39 +194,26 @@ function Dashboard () {
 
                     {/* Stat Summary Cards Grid */}
                     <section className="row g-4 mb-4 animate-fade-in">
-                        {/* Card 1: Balance */}
-                        <div className="col-md-4">
-                            <div className="glass-card stat-card balance-theme">
-                                <div className="stat-icon-wrapper">
-                                    <i className="fa-solid fa-vault"></i>
-                                </div>
-                                <small className="text-muted d-block text-uppercase fw-semibold tracking-wider">Total Balance</small>
-                                <div className="card-amount">$14,240.50</div>
-                                <span className="small text-success"><i className="fa-solid fa-arrow-trend-up me-1"></i>+4.2% from last month</span>
-                            </div>
-                        </div>
-                        {/* Card 2: Income */}
-                        <div className="col-md-4">
-                            <div className="glass-card stat-card income-theme">
-                                <div className="stat-icon-wrapper">
-                                    <i className="fa-solid fa-arrow-down-long"></i>
-                                </div>
-                                <small className="text-muted d-block text-uppercase fw-semibold tracking-wider">Monthly Income</small>
-                                <div className="card-amount">$5,800.00</div>
-                                <span className="small text-muted">Fixed salary & freelancing</span>
-                            </div>
-                        </div>
-                        {/* Card 3: Expenses */}
-                        <div className="col-md-4">
-                            <div className="glass-card stat-card expense-theme">
-                                <div className="stat-icon-wrapper">
-                                    <i className="fa-solid fa-arrow-up-long"></i>
-                                </div>
-                                <small className="text-muted d-block text-uppercase fw-semibold tracking-wider">Monthly Expenses</small>
-                                <div className="card-amount">$2,410.20</div>
-                                <span className="small text-danger"><i className="fa-solid fa-arrow-trend-up me-1"></i>+8.5% dining increase</span>
-                            </div>
-                        </div>
+                        <MonthlyDashboard
+                            icon="fa-solid fa-vault"
+                            title="Total Balance"
+                            amount={totalBalance}
+                            theme="balance-theme"
+                        />
+                        <MonthlyDashboard
+                            icon="fa-solid fa-arrow-down-long"
+                            title="Monthly Income"
+                            amount={monthlyIncome}
+                            theme="income-theme"
+                        />
+                        <MonthlyDashboard
+                            icon="fa-solid fa-arrow-up-long"
+                            title="Monthly Expenses"
+                            amount={monthlyExpenses}
+                            theme="expense-theme"
+                        />
+
+                        
                     </section>
 
                     {/* Chart Row */}
@@ -194,8 +228,49 @@ function Dashboard () {
                                         <option>Last Year</option>
                                     </select>
                                 </div>
-                                <div style={{position: 'relative', height: '300px', width: '100%'}}>
-                                    <canvas id="cashFlowChart"></canvas>
+                                <div style={{ width: "100%", height: "300px" }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <ComposedChart data={flowData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="month" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Area
+                                                type="linear"
+                                                dataKey="income"
+                                                fill="#10b981"
+                                                fillOpacity={0.10}
+                                                stroke="none"
+                                                tooltipType="none"
+                                                legendType="none"
+                                            />
+                                            <Area
+                                                type="linear"
+                                                dataKey="expenses"
+                                                fill="#ff3b5c"
+                                                fillOpacity={0.15}
+                                                stroke="none"
+                                                tooltipType="none"
+                                                legendType="none"
+                                            />
+                                            <Line
+                                                type="linear"
+                                                dataKey="income"
+                                                name="Income"
+                                                stroke="#10b981"
+                                                strokeWidth={3}
+                                            />
+
+                                            <Line
+                                                type="linear"
+                                                dataKey="expenses"
+                                                name="Expenses"
+                                                stroke="#ff3b5c"
+                                                strokeWidth={3}
+                                            />
+                                        </ComposedChart>
+                                    </ResponsiveContainer>
                                 </div>
                             </div>
                         </div>
@@ -203,8 +278,39 @@ function Dashboard () {
                         <div className="col-lg-4">
                             <div className="glass-card-no-hover p-4 h-100">
                                 <h4 className="m-0 fs-5 mb-3">Expense Distribution</h4>
-                                <div style={{position: 'relative', height: '260px', width: '100%', margin: '0 auto'}}>
-                                    <canvas id="categoryChart"></canvas>
+                                <div style={{ position: "relative", width: "100%", height: "300px" }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={expenseData}
+                                                dataKey="amount"
+                                                nameKey="category"
+                                                cx="50%"
+                                                cy="40%"
+                                                outerRadius={90}
+                                                innerRadius={60}
+                                            />
+                                            <Tooltip />
+                                            <Legend
+                                                formatter={(value, entry) =>
+                                                `${value} ($${entry.payload.amount.toLocaleString()})`
+                                                }
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+
+                                    <div
+                                        style={{
+                                        position: "absolute",
+                                        top: "40%",
+                                        left: "50%",
+                                        transform: "translate(-50%, -50%)",
+                                        textAlign: "center"
+                                        }}
+                                    >
+                                        <small className="text-muted">Total Spent</small>
+                                        <div className="fw-bold fs-5">${totalExpenses.toLocaleString()}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -213,94 +319,7 @@ function Dashboard () {
                     {/* Grid Bottom Row: AI Insights & Recent Transactions */}
                     <section className="row g-4 animate-fade-in" style={{animationDelay: '0.2s'}}>
                         {/* Financial Calendar Panel */}
-                        <div className="col-xl-6">
-                            <div className="glass-card-no-hover p-4 h-100">
-                                <div className="calendar-header mb-3">
-                                    <div className="d-flex align-items-center gap-2">
-                                        <div className="logo-icon" style={{width: '32px', height: '32px', borderRadius: '8px'}}>
-                                            <i className="fa-solid fa-calendar-days text-white fs-6"></i>
-                                        </div>
-                                        <h4 className="m-0 fs-5" id="monthYearDisplay">July 2026</h4>
-                                    </div>
-                                    <div className="d-flex gap-1">
-                                        <button className="btn btn-sm btn-outline-custom p-1" onclick="changeMonth(-1)" title="Previous Month">
-                                            <i className="fa-solid fa-chevron-left px-1"></i>
-                                        </button>
-                                        <button className="btn btn-sm btn-outline-custom py-1 px-2" onclick="goToToday()">Today</button>
-                                        <button className="btn btn-sm btn-outline-custom p-1" onclick="changeMonth(1)" title="Next Month">
-                                            <i className="fa-solid fa-chevron-right px-1"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Calendar Weekdays Header */}
-                                <div className="calendar-grid-header mt-2">
-                                    <div>Sun</div>
-                                    <div>Mon</div>
-                                    <div>Tue</div>
-                                    <div>Wed</div>
-                                    <div>Thu</div>
-                                    <div>Fri</div>
-                                    <div>Sat</div>
-                                </div>
-
-                                {/* Calendar Grid days */}
-                                <div className="calendar-grid" id="calendarDays">
-                                    {/* Days will be generated by JS */}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Recent Transactions Summary List */}
-                        <div className="col-xl-6">
-                            <div className="glass-card-no-hover p-4 h-100">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <h4 className="m-0 fs-5">Recent Transactions</h4>
-                                    <a href="transactions.html" className="small text-decoration-none">View All</a>
-                                </div>
-                                <div className="table-responsive">
-                                    <table className="table custom-table mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Details</th>
-                                                <th>Category</th>
-                                                <th>Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Jul 15, 2026</td>
-                                                <td>
-                                                    <span className="fw-bold d-block">Whole Foods Market</span>
-                                                    <small className="text-muted">Debit Card Purchase</small>
-                                                </td>
-                                                <td><span className="badge-expense text-uppercase">Food</span></td>
-                                                <td className="text-danger fw-bold">-$84.20</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jul 14, 2026</td>
-                                                <td>
-                                                    <span className="fw-bold d-block">Monthly Freelance Salary</span>
-                                                    <small className="text-muted">Direct Deposit</small>
-                                                </td>
-                                                <td><span className="badge-income text-uppercase">Income</span></td>
-                                                <td className="text-success fw-bold">+$1,500.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jul 12, 2026</td>
-                                                <td>
-                                                    <span className="fw-bold d-block">Netflix Subscription</span>
-                                                    <small className="text-muted">Recurring Payment</small>
-                                                </td>
-                                                <td><span className="badge-expense text-uppercase">Utility</span></td>
-                                                <td className="text-danger fw-bold">-$15.49</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                        <Calendar />
                     </section>
                 </main>
             </div>

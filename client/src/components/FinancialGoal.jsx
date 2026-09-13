@@ -1,4 +1,4 @@
-function FinancialGoal ({title, target, saved, percentage, date}) {
+function FinancialGoal ({id, title, targetAmount, currentAmount, percentage, date, onEdit}) {
 
     return(
         <>
@@ -11,13 +11,13 @@ function FinancialGoal ({title, target, saved, percentage, date}) {
                     <span className="fs-5 fw-bold text-secondary">{percentage}% Done</span>
                 </div>
                 <div className="budget-header small text-white mb-1">
-                    <span>Current: ${saved}</span>
-                    <span>Target: ${target}</span>
+                    <span>Current: ${currentAmount}</span>
+                    <span>Target: ${targetAmount}</span>
                 </div>
                 <div className="progress-bar-custom mb-3">
                     <div className="progress-fill" style={{width: `${percentage}%`, background: 'var(--accent-secondary)'}}></div>
                 </div>
-                <button className="btn btn-sm btn-outline-custom w-100" data-bs-toggle="modal" data-bs-target="#editGoalModal">
+                <button type="button" onClick={() => onEdit(id)} data-bs-toggle="modal" data-bs-target="#addGoalModal" className="btn btn-sm btn-outline-custom w-100">
                     <i className="fa-solid fa-coins me-1"></i>Deposit Funds / Adjust Goal
                 </button>
             </div>

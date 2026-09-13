@@ -1,14 +1,47 @@
 import {NavLink} from 'react-router-dom';
+import React from "react";
+import { useState, useEffect } from "react";
 import "../assets/css/base.css";
 import "../assets/css/settings.css";
 import avatar1 from "../assets/images/avatar-1.jpg";
 import avatar2 from "../assets/images/avatar-2.jpg";
 import avatar3 from "../assets/images/avatar-3.jpg";
 import avatar4 from "../assets/images/avatar-4.jpg";
+import Sidebar from "../components/Sidebar.jsx";
 
 
 
 function Settings () {
+
+    const [profileName, setProfileName] = useState("Sophia Miller");
+    const [profileEmail, setProfileEmail] = useState("sophia.miller@example.com");
+    const [selectedAvatar, setSelectedAvatar] = useState(avatar1);
+    const [customAvatarUrl, setCustomAvatarUrl] = useState("");
+
+    useEffect(() => {
+        const savedProfile = localStorage.getItem("fintrackProfile");
+
+        if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+
+            setProfileName(profile.name);
+            setProfileEmail(profile.email);
+            setSelectedAvatar(profile.avatar);
+        }
+    }, []);
+
+    const handleSubmit = (e) => {
+        e.preventDefault(); 
+        localStorage.setItem(
+            "fintrackProfile",
+            JSON.stringify({
+                name: profileName,
+                email: profileEmail,
+                avatar: selectedAvatar
+            })
+        );
+        window.dispatchEvent(new Event("profileUpdated"));
+    }
     
     return (
         <>
@@ -20,10 +53,10 @@ function Settings () {
             <input type="radio" id="tab-data" name="settings-tabs" className="tab-input"/>
 
             {/* iOS-Style Toast Notification Container */}
-            <div className="iphone-notification-container" id="iphoneNotificationContainer"></div>
+            {/* <div className="iphone-notification-container" id="iphoneNotificationContainer"></div> */}
 
             {/* Mobile Header (Visible on small screens) */}
-            <div className="mobile-header">
+            {/* <div className="mobile-header">
                 <div className="d-flex align-items-center gap-2">
                     <div className="logo-icon" style={{width: '32px', height: '32px', borderRadius: '8px'}}>
                         <i className="fa-solid fa-wallet text-white fs-6"></i>
@@ -33,67 +66,11 @@ function Settings () {
                 <label htmlFor="sidebarToggleCheck" className="btn btn-outline-custom p-2 cursor-pointer" id="sidebarToggle">
                     <i className="fa-solid fa-bars"></i>
                 </label>
-            </div>
+            </div> */}
 
             <div className="app-container">
                 {/* SIDEBAR */}
-                <aside className="sidebar" id="sidebar">
-                    <div className="logo-area">
-                        <div className="logo-icon">
-                            <i className="fa-solid fa-wallet text-white fs-5"></i>
-                        </div>
-                        <h2 className="logo-text m-0">FinTrack</h2>
-                    </div>
-
-                    <nav className="w-100 mb-4">
-                        <ul className="nav-menu p-0 m-0">
-                            <li>
-                                <NavLink to="/dashboard" className="nav-item-link">
-                                    <i className="fa-solid fa-chart-pie"></i>
-                                    <span>Dashboard</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/transactions" className="nav-item-link">
-                                    <i className="fa-solid fa-list-check"></i>
-                                    <span>Transactions</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/budget" className="nav-item-link">
-                                    <i className="fa-solid fa-wallet"></i>
-                                    <span>Budgets & Goals</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/reports" className="nav-item-link">
-                                    <i className="fa-solid fa-circle-nodes"></i>
-                                    <span>Reports & AI</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/settings" className="nav-item-link">
-                                    <i className="fa-solid fa-gear"></i>
-                                    <span>Settings</span>
-                                </NavLink>
-                            </li>
-                        </ul>
-                    </nav>
-
-                    <div className="user-profile-section">
-                        <div className="user-card mb-3">
-                            <img src={avatar1} alt="User Avatar" className="user-avatar" id="sidebarAvatar"/>
-                            <div className="overflow-hidden">
-                                <h6 className="m-0 text-truncate text-white" id="sidebarName">Sophia Miller</h6>
-                                <small className="text-muted text-truncate d-block" id="sidebarPlan">Premium Plan</small>
-                            </div>
-                        </div>
-                        <NavLink to="/login" className="nav-item-link p-2 text-danger bg-transparent" style={{border: 'none'}}>
-                            <i className="fa-solid fa-right-from-bracket"></i>
-                            <span>Logout</span>
-                        </NavLink>
-                    </div>
-                </aside>
+                <Sidebar/>
 
                 {/* MAIN LAYOUT */}
                 <main className="main-content">
@@ -129,40 +106,44 @@ function Settings () {
                             <section id="account-details" className="settings-panel">
                                 <div className="settings-card mb-4">
                                     <h4 className="mb-4"><i className="fa-regular fa-id-card text-primary me-2"></i>Profile Information</h4>
-                                    <form id="profileForm">
+                                    <form id="profileForm" onSubmit={handleSubmit}>
                                         <div className="row g-3 mb-4">
                                             <div className="col-md-6 col-12">
                                                 <label htmlFor="profileName" className="form-label">Full Name</label>
-                                                <input type="text" className="form-control" id="profileName" placeholder="Enter Full Name" value="Sophia Miller" required/>
+                                                <input type="text" className="form-control" id="profileName" placeholder="Enter Full Name" value={profileName} onChange={(e) => setProfileName(e.target.value)} required/>
                                             </div>
                                             <div className="col-md-6 col-12">
                                                 <label htmlFor="profileEmail" className="form-label">Email Address</label>
-                                                <input type="email" className="form-control" id="profileEmail" placeholder="name@example.com" value="sophia.miller@example.com" required/>
+                                                <input type="email" className="form-control" id="profileEmail" placeholder="name@example.com" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} required/>
                                             </div>
                                         </div>
 
                                         <div className="mb-4">
                                             <label className="form-label d-block">Choose Profile Avatar</label>
                                             <div className="avatar-select-grid mb-3" id="avatarGrid">
-                                                <div className="avatar-option selected">
+                                                <div className={`avatar-option ${selectedAvatar === avatar1 ? "selected" : ""}`}
+                                                    onClick={() => setSelectedAvatar(avatar1)}>
                                                     <img src={avatar1} alt="Avatar Option 1"/>
                                                     <div className="avatar-check-icon">
                                                         <i className="fa-solid fa-check"></i>
                                                     </div>
                                                 </div>
-                                                <div className="avatar-option">
+                                                <div className={`avatar-option ${selectedAvatar === avatar2 ? "selected" : ""}`}
+                                                    onClick={() => setSelectedAvatar(avatar2)}>
                                                     <img src={avatar2} alt="Avatar Option 2"/>
                                                     <div className="avatar-check-icon">
                                                         <i className="fa-solid fa-check"></i>
                                                     </div>
                                                 </div>
-                                                <div className="avatar-option">
+                                                <div className={`avatar-option ${selectedAvatar === avatar3 ? "selected" : ""}`}
+                                                    onClick={() => setSelectedAvatar(avatar3)}>
                                                     <img src={avatar3} alt="Avatar Option 3"/>
                                                     <div className="avatar-check-icon">
                                                         <i className="fa-solid fa-check"></i>
                                                     </div>
                                                 </div>
-                                                <div className="avatar-option">
+                                                <div className={`avatar-option ${selectedAvatar === avatar4 ? "selected" : ""}`}
+                                                    onClick={() => setSelectedAvatar(avatar4)}>
                                                     <img src={avatar4} alt="Avatar Option 4"/>
                                                     <div className="avatar-check-icon">
                                                         <i className="fa-solid fa-check"></i>
@@ -170,7 +151,13 @@ function Settings () {
                                                 </div>
                                             </div>
                                             <label htmlFor="customAvatarUrl" className="form-label small text-muted">Or enter a custom Avatar image URL</label>
-                                            <input type="url" className="form-control" id="customAvatarUrl" placeholder="https://images.unsplash.com/photo-..."/>
+                                            <input 
+                                                type="url"
+                                                className="form-control"
+                                                id="customAvatarUrl"
+                                                value={customAvatarUrl} 
+                                                onChange={(e) => {setCustomAvatarUrl(e.target.value); setSelectedAvatar(e.target.value);}} 
+                                                placeholder="https://images.unsplash.com/photo-..." />
                                         </div>
 
                                         <div className="border-top pt-3 text-end">

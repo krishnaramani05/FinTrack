@@ -123,3 +123,17 @@
     padding: 1rem;
     border-radius: 12px;
 }
+
+
+@media print {
+    .report-export-btn {
+        display: none !important;
+    }
+}
+
+@media print {
+    .print-hide-chart {
+        display: none !important;
+    }
+}
+

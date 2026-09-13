@@ -1,23 +1,23 @@
 export const Records = [
     {
         "id": 1,
-        "date": "2023-01-01",
+        "date": "2026-09-01",
         "title": "Whole Foods",
         "category": "Food",
         "type": "Expense",
-        "amount": 50.00,
+        "amount": 500.00,
     },
     {
         "id": 2,
-        "date": "2026-10-01",
-        "title": "Traveling blog",
-        "category": "Traveling",
-        "type": "Expense",
-        "amount": 100.00,
+        "date": "2026-05-01",
+        "title": "Rent",
+        "category": "house",
+        "type": "expense",
+        "amount": 1000.00,
     },
     {
         "id": 3,
-        "date": "2023-01-01",
+        "date": "2026-06-01",
         "title": "food frankie",
         "category": "Food",
         "type": "Expense",
@@ -25,7 +25,7 @@ export const Records = [
     },
     {
         "id": 4,
-        "date": "2023-01-01",
+        "date": "2026-07-01",
         "title": "salary",
         "category": "salary",
         "type": "Income",
@@ -37,7 +37,15 @@ export const Records = [
         "title": "entertainment",
         "category": "entertainment",
         "type": "Expense",
-        "amount": 500.00,
+        "amount": 300.00,
+    },
+    {
+        "id": 6,
+        "date": "2026-09-15",
+        "title": "rent",
+        "category": "house",
+        "type": "income",
+        "amount": 3000.00,
     },
     
 ]
@@ -54,7 +62,7 @@ export const BudgetRecords = [
         id: 2,
         category: "house",
         limit: 1200,
-        month: "2023-01"
+        month: "2026-09"
     },
     {
         id: 3,
@@ -95,15 +103,15 @@ export const GoalRecords = [
     {
         id: 1,
         title: "Emergency Fund Goal",
-        target: 10000,
-        saved: 3250,
-        targetDate: "2026-10-01"
+        targetAmount: 10000,
+        currentAmount: 3250,
+        date: "2026-10-01"
     },
     {
         id: 2,
         title: "New MacBook Pro M3",
-        target: 3000,
-        saved: 2400,
-        targetDate: "2026-02-05"
+        targetAmount: 3000,
+        currentAmount: 2400,
+        date: "2026-02-05"
     }
 ];

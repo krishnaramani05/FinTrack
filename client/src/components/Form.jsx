@@ -27,7 +27,7 @@ function Form ({ formData, handleChange, handleSubmit, isEditing }) {
                                         <label htmlFor="category" className="form-label">Category</label>
                                         <select name="category" onChange={handleChange} value={formData.category} className="form-select" id="category">
                                             <option value="food">Food & Dining</option>
-                                            <option value="rent">Rent / Housing</option>
+                                            <option value="rent">House</option>
                                             <option value="utility">Utilities</option>
                                             <option value="entertainment">Entertainment</option>
                                             <option value="shopping">Shopping</option>
@@ -52,7 +52,7 @@ function Form ({ formData, handleChange, handleSubmit, isEditing }) {
                             </div>
                             <div className="modal-footer border-top border-secondary">
                                 <button type="button" className="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" data-bs-dismiss="modal" className="btn btn-primary">{isEditing ? "Save Changes" : "Add Transaction"}</button>
+                                <button type="submit" className="btn btn-primary">{isEditing ? "Save Changes" : "Add Transaction"}</button>
                             </div>
                         </form>
                     </div>
