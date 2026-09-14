@@ -8,7 +8,7 @@ import Sidebar from '../components/Sidebar.jsx'
 
 function Transactions () {
 
-    const [transactionRecords, setTransactionRecords] = useState(Records);
+    const [transactionRecords, setTransactionRecords] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [search, setSearch] = useState('');
@@ -20,8 +20,18 @@ function Transactions () {
         category: 'food',
         amount: '',
         date: '',
-        notes: '',
     })
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/transactions")
+            .then((response) => response.json())
+            .then((data) => {
+                setTransactionRecords(data);
+            })
+            .catch((error) => {
+                console.log("Error fetching transactions:", error);
+            });
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -30,61 +40,97 @@ function Transactions () {
         })
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (editingId === null) {
-            //create
-            const newTransaction = {
-                id: Date.now(),
-                date: formData.date,
-                title: formData.title,
-                category: formData.category,
-                type: formData.type,
-                amount: Number(formData.amount),
-                notes: formData.notes
-            };
+            // Create
+            try {
+                const response = await fetch(
+                    "http://localhost:5000/api/transactions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            date: formData.date,
+                            title: formData.title,
+                            category: formData.category,
+                            type: formData.type,
+                            amount: Number(formData.amount)
+                        })
+                    }
+                );
 
-            setTransactionRecords((previousRecords) => [
-                ...previousRecords,
-                newTransaction
-            ]);
-            console.log("New transaction:", newTransaction);
+                const savedTransaction = await response.json();
 
+                setTransactionRecords((previousRecords) => [
+                    ...previousRecords,
+                    savedTransaction
+                ]);
+                console.log("Transaction saved:", savedTransaction);
+            } catch (error) {
+                console.log("Error saving transaction:", error);
+            }
         }
         else
         {
-            // update
-            const updatedTransaction = {
-                id: editingId,
-                date: formData.date,
-                title: formData.title,
-                category: formData.category,
-                type: formData.type,
-                amount: Number(formData.amount),
-                notes: formData.notes
-            };
-            setTransactionRecords(previousRecords =>
-                previousRecords.map(record => record.id === editingId ? updatedTransaction : record)
+            // Update
+            const response = await fetch(
+                `http://localhost:5000/api/transactions/${editingId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        title: formData.title,
+                        amount: Number(formData.amount),
+                        type: formData.type,
+                        category: formData.category,
+                        date: formData.date
+                    })
+                }
             );
-            console.log("Updated transaction:", updatedTransaction);
+            const updatedRecord = await response.json();
+            setTransactionRecords((previousRecords) =>
+                previousRecords.map((record) =>
+                    record._id === updatedRecord._id
+                        ? updatedRecord
+                        : record
+                )
+            );
         }
         setEditingId(null);
         resetForm();
     };
 
-    const handleDelete = (id) => {
-        setDeleteId(id);
-    }
+    const handleDelete = async (id) => {
+        try {
+            await fetch(
+                `http://localhost:5000/api/transactions/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            setTransactionRecords(
+                transactionRecords.filter((record) => record._id !== id)
+            );
+        } catch (error) {
+            console.log("Error deleting transaction:", error);
+        }
+    };
 
     const confirmDelete = () => {
         setTransactionRecords((previousRecords) =>
-            previousRecords.filter((record) => record.id !== deleteId)
+            previousRecords.filter((record) => record._id !== deleteId)
         );
         setDeleteId(null);
     };
 
     const handleEdit = (id) => {
-        const edit = transactionRecords.find((record) => record.id === id);
+        const edit = transactionRecords.find((record) => record._id === id);
         setEditingId(id);
 
         setFormData({
@@ -93,7 +139,6 @@ function Transactions () {
             category: edit.category,
             type: edit.type,
             amount: edit.amount,
-            notes: edit.notes
         });
     }
 
@@ -104,7 +149,6 @@ function Transactions () {
             category: 'food',
             amount: '',
             date: '',
-            notes: ''
         });
     };
 

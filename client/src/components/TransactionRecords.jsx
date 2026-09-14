@@ -45,10 +45,10 @@ function TransactionRecords ({ records, onDelete, onEdit }) {
                                 <td><span className="badge-expense text-uppercase">{record.type}</span></td>
                                 <td className="text-danger fw-bold">{record.amount}</td>
                                 <td className="text-end">
-                                    <button onClick={() => onEdit(record.id)} data-bs-toggle="modal" data-bs-target="#transactionModal" className="btn btn-sm btn-outline-custom me-1" title="Edit Transaction">
+                                    <button onClick={() => onEdit(record._id)} data-bs-toggle="modal" data-bs-target="#transactionModal" className="btn btn-sm btn-outline-custom me-1" title="Edit Transaction">
                                         <i className="fa-regular fa-pen-to-square"></i>
                                     </button>
-                                    <button onClick={() => onDelete(record.id)} className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal" title="Delete Transaction">
+                                    <button onClick={() => onDelete(record._id)} className="btn btn-sm btn-outline-custom text-danger" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal" title="Delete Transaction">
                                         <i className="fa-regular fa-trash-can"></i>
                                     </button>
                                 </td>
